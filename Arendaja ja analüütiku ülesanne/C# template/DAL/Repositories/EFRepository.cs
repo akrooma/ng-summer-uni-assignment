@@ -154,5 +154,14 @@ namespace DAL.Repositories
 			//maybe log something?
 		}
 
+		/// <summary>
+		/// http://stackoverflow.com/questions/15220411/entity-framework-delete-all-rows-in-table
+		/// Second answer from link.
+		/// </summary>
+		public void Clear()
+		{
+			if (DbSet.Any())
+				DbSet.RemoveRange(DbSet);
+		}
 	}
 }

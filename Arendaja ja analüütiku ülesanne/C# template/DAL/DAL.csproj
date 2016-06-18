@@ -50,16 +50,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DiseaseDbContext.cs" />
+    <Compile Include="Helpers\EFRepositoryFactories.cs" />
+    <Compile Include="Helpers\EFRepositoryProvider.cs" />
     <Compile Include="Interfaces\Domain objects\IDiseaseRepository.cs" />
     <Compile Include="Interfaces\Domain objects\IDiseaseSymptomRepository.cs" />
     <Compile Include="Interfaces\Domain objects\ISymptomRepository.cs" />
     <Compile Include="Interfaces\IDbContext.cs" />
     <Compile Include="Interfaces\IEFRepository.cs" />
+    <Compile Include="Interfaces\IEFRepositoryProvider.cs" />
+    <Compile Include="Interfaces\IUOW.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\Domain objects\DiseaseRepository.cs" />
     <Compile Include="Repositories\Domain objects\DiseaseSymptomRepository.cs" />
     <Compile Include="Repositories\Domain objects\SymptomRepository.cs" />
     <Compile Include="Repositories\EFRepository.cs" />
+    <Compile Include="UOW.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

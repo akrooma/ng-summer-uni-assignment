@@ -9,5 +9,7 @@ namespace DAL.Interfaces.Domain_objects
 {
 	public interface ISymptomRepository : IEFRepository<Symptom>
 	{
+		int AddIfNotExists(string name);
+		List<Symptom> TopThreeSymptoms();
 	}
 }
