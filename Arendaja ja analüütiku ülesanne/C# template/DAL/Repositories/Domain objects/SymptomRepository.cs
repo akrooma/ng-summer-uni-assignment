@@ -13,34 +13,26 @@ namespace DAL.Repositories.Domain_objects
 	{
 		public SymptomRepository(IDbContext dBContext) : base(dBContext) { }
 
-		/// <summary>
-		/// Checks if a symptom with given name exists. If not, one is created.
-		/// </summary>
-		/// <param name="name">Symptom's name</param>
-		/// <returns>Id of the symptom</returns>
-		public int AddIfNotExists(string name)
+		// Note: see interface for implementation summaries
+
+		public int addIfNotExists(string symptomName)
 		{
-			var symptom = DbSet.SingleOrDefault(s => s.Name == name);
+			var symptom = DbSet.SingleOrDefault(s => s.Name == symptomName);
 			
 			if (symptom != null)
 				return symptom.SymptomId;
 			
-			symptom = new Symptom { Name = name };
+			symptom = new Symptom { Name = symptomName };
 			Add(symptom);
 			SaveChanges();
 			
 			return symptom.SymptomId;
 		}
 
-		/// <summary>
-		/// Gets the three most popular symptoms by disease count. Result is ordered by disease count(high -> low) 
-		/// and symptom name.
-		/// </summary>
-		/// <returns></returns>
-		public List<Symptom> TopThreeSymptoms()
+		public List<Symptom> topThreeSymptoms()
 		{
 			var query = DbSet.OrderByDescending(s => s.Diseases.Count).ThenBy(s => s.Name).Take(3);
-
+			
 			return query.ToList();
 		}
 	}

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DAL.Helpers.Models;
+using DAL.Helpers.Model_factories;
 using DAL.Interfaces;
 using DAL.Interfaces.Domain_objects;
 using Domain;
@@ -14,30 +15,28 @@ namespace DAL.Repositories.Domain_objects
 	{
 		public DiseaseRepository(IDbContext dBContext) : base(dBContext) { }
 
+		// Note: see interface summaries for info.
+
 		/// <summary>
-		/// Checks of a disease with the given name exists already. If not, one is created.
+		/// Implements <see cref="IDiseaseRepository.addIfNotExists(string)"/>
 		/// </summary>
-		/// <param name="name">Name of the disease</param>
-		/// <returns>Disease's id</returns>
-		public int AddIfNotExists(string name)
+		/// <param name="diseaseName"></param>
+		/// <returns></returns>
+		public int addIfNotExists(string diseaseName)
 		{
-			var disease = DbSet.SingleOrDefault(s => s.Name == name);
+			var disease = DbSet.SingleOrDefault(s => s.Name == diseaseName);
 
 			if (disease != null)
 				return disease.DiseaseId;
 
-			disease = new Disease { Name = name };
+			disease = new Disease { Name = diseaseName };
 			Add(disease);
 			SaveChanges();
 
 			return disease.DiseaseId;
 		}
 
-		/// <summary>
-		/// Finds 3 diseases with the most amount of symptoms.
-		/// Ordered by symptom amount. If the amounts are equal, then the diseases are ordered alphabetically.
-		/// </summary>
-		/// <returns></returns>
+
 		public List<Disease> topThreeDiseases()
 		{
 			var query = DbSet.OrderByDescending(d => d.Symptoms.Count).ThenBy(d => d.Name).Take(3);
@@ -45,21 +44,34 @@ namespace DAL.Repositories.Domain_objects
 			return query.ToList();
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="symptoms"></param>
-		/// <returns></returns>
 		public List<Disease> possibleDiseases(string [] symptoms)
 		{
-			//var query = DbSet.Where(d => d.Symptoms)
+			var firstSymptom = symptoms[0].Trim();
 
-			return null;
+			var query = DbSet.Where(c => c.Symptoms.Any(s => s.Symptom.Name == firstSymptom));
+
+			foreach (var symptom in symptoms.Skip(1))
+			{
+				query = query.Where(c => c.Symptoms.Any(s => s.Symptom.Name == symptom));
+			}
+
+			return query.ToList();
+
+			#region alternative_solution
+			// Note: with this, the method's return type is List<DiseaseWithSymptomNamesFactory>
+			// in order to use this, changes have to be made to the IDiseaseRepository file as well.
+
+			//var result = DbSet.ToList().Select(d => DiseaseWithSymptomNamesFactory.createEntity(d));
+
+			//foreach (var item in symptoms)
+			//{
+			//	result = result.Where(d => d.Symptoms.Contains(item));
+			//}
+
+			//return result.ToList();
+
+			#endregion
 		}
 
-		public List<DiseaseWithSymptomNames> getAllDiseasesWithJustSymptomNames()
-		{
-			return DbSet.Select(d => new DiseaseWithSymptomNames()).ToList();
-		}
-	}
-}
+	} // DiseaseRepo class
+} // namespace

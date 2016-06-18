@@ -1,8 +1,13 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Data.Entity.Infrastructure;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using DAL;
 using DAL.Helpers;
+using DAL.Helpers.Model_factories;
 using DAL.Interfaces;
 using DiseaseDatabase.Helpers;
 using Domain;
@@ -12,6 +17,9 @@ namespace DiseaseDatabase
 {
 	class Program
 	{
+		/// <summary>
+		/// Unit of work to hold all the repos that handle all the database tables.
+		/// </summary>
 		private static IUOW _uow;
 
 		static void Main(string[] args)
@@ -21,9 +29,8 @@ namespace DiseaseDatabase
 			//var csvLines = getInputFileContent(new []{ "Diseases.csv" });
 			//populateDatabase(csvLines);
 
-			firstTask();
-
-
+			//firstTask();
+			secondTask();
 		}
 
 		/// <summary>
@@ -39,7 +46,7 @@ namespace DiseaseDatabase
 			{
 				try
 				{
-					string[] result = File.ReadAllLines(args[0]);
+					var result = File.ReadAllLines(args[0]);
 
 					return result;
 				}
@@ -50,10 +57,10 @@ namespace DiseaseDatabase
 			}
 			else
 			{
-				Console.WriteLine("No arguments or too many given. Args[] length: " + args.Length);
+				writeLineOnConsole("No arguments or too many given. Args[] length: ");
 			}
 			
-			Console.WriteLine("Insert the file's name or path:" + System.Environment.NewLine);
+			writeLineOnConsole("Insert the file's name or path:");
 
 			var userInput = Console.ReadLine();
 
@@ -68,34 +75,33 @@ namespace DiseaseDatabase
 		/// <param name="csvLines">String array containing lines from a file.</param>
 		private static void populateDatabase(string[] csvLines)
 		{
-			Console.WriteLine("File lines retrieved, will begin populating the database with data." + System.Environment.NewLine);
+			writeLineOnConsole("File lines retrieved, will begin populating the database with data.");
 
 			foreach (var csvLine in csvLines)
 			{
 				var csvLinePieces = csvLine.Split(',');
 
-				var diseaseId = _uow.Diseases.AddIfNotExists(csvLinePieces[0].Trim());
-
-				for (int i = 1; i < csvLinePieces.Length; i++)
+				for (var i = 1; i < csvLinePieces.Length; i++)
 				{
 					var diseaseSymptom = new DiseaseSymptom
 					{
-						DiseaseId = diseaseId,
-						SymptomId = _uow.Symptoms.AddIfNotExists(csvLinePieces[i].Trim())
+						DiseaseId = _uow.Diseases.addIfNotExists(csvLinePieces[0].Trim()),
+						SymptomId = _uow.Symptoms.addIfNotExists(csvLinePieces[i].Trim())
 					};
-
+					
 					_uow.DiseaseSymptoms.Add(diseaseSymptom);
 				}
 			}
 
 			_uow.Commit();
 
-			Console.WriteLine("Filling up the database was a success!" + System.Environment.NewLine);
+			writeLineOnConsole("Filling up the database was a success!");
 
+			/*
 			Console.WriteLine("Number of diseases: " + _uow.Diseases.All.Count + System.Environment.NewLine + 
 					"Number of symptoms: " + _uow.Symptoms.All.Count + System.Environment.NewLine + 
 					"Number of combinations: " + _uow.DiseaseSymptoms.All.Count);
-
+			*/
 		}
 
 		/// <summary>
@@ -110,12 +116,13 @@ namespace DiseaseDatabase
 
 		/// <summary>
 		/// Subtask 1.1: top three diseases by symptom count, ordered by the count and then by disease name alphabetically.
+		/// Actual method is in the DiseaseRepo.
 		/// </summary>
 		public static void topThreeDiseases()
 		{
 			var diseases = _uow.Diseases.topThreeDiseases();
 
-			Console.WriteLine(System.Environment.NewLine + "1.1. Top three diseases by symptom count:");
+			writeLineOnConsole("1.1. Top three diseases by symptom count:");
 
 			foreach (var disease in diseases)
 			{
@@ -128,20 +135,19 @@ namespace DiseaseDatabase
 		/// </summary>
 		public static void uniqueSymptomCount()
 		{
-			var uniqueSymptomCount = _uow.Symptoms.All.Count;
-
-			Console.WriteLine(System.Environment.NewLine + "1.2. The amount of unique symptoms:" + System.Environment.NewLine +
-				"\t" + uniqueSymptomCount);
+			writeLineOnConsole("1.2. The amount of unique symptoms:");
+			writeLineOnConsole("\t" + _uow.Symptoms.All.Count);
 		}
 
 		/// <summary>
 		/// Subtask 1.3: top three symptoms by disease count. Ordered by disease count and then by symptom name.
+		/// Actual querying method is in the SymptomRepository.
 		/// </summary>
 		public static void topThreeSymptoms()
 		{
-			var symptoms = _uow.Symptoms.TopThreeSymptoms();
+			var symptoms = _uow.Symptoms.topThreeSymptoms();
 
-			Console.WriteLine(System.Environment.NewLine + "1.3. Top three symptoms by disease count:");
+			writeLineOnConsole("1.3. Top three symptoms by disease count:");
 
 			foreach (var symptom in symptoms)
 			{
@@ -150,21 +156,54 @@ namespace DiseaseDatabase
 		}
 
 		/// <summary>
-		/// Method to solve the second task. 
+		/// Solution for the second task. This method mainly holds code for console manipulation.
+		/// Querying and such is done in the DiseaseRepo.
 		/// </summary>
 		public static void secondTask()
 		{
-			Console.WriteLine(System.Environment.NewLine + "2.2. Potential diseases based on symptoms: (type 'Exit loop' to end this task)");
+			writeLineOnConsole("2.2. Potential diseases based on symptoms: (type 'Exit task' to stop the cycle)");
 
 			while (true)
 			{
-				Console.WriteLine(System.Environment.NewLine + "Insert the list of symptoms separated by commas: ");
+				writeLineOnConsole("Insert the list of symptoms separated by commas: ");
+
 				var consoleInput = Console.ReadLine();
-				
+
 				if (inputIsExitCommand(consoleInput)) return;
+
+				if (consoleInput.Length == 0) continue; // process starts all over again if the user pressed just enter.
+
+				var diseases = _uow.Diseases.possibleDiseases(consoleInput.Split(','));
+
+				if (diseases.Any())
+				{
+					Console.WriteLine(Environment.NewLine + "Result: possible diseases for given symptoms:");
+
+					foreach (var disease in diseases)
+					{
+						Console.WriteLine("\t" + disease.Name);
+					}
+				}
+				else
+				{
+					Console.WriteLine(Environment.NewLine + "Couldn't find any diseases for given symptoms: ");
+					
+					foreach (var symptom in consoleInput.Split(','))
+					{
+						Console.WriteLine("\t" + symptom);
+					}
+				}
 				
-				
+				writeLineOnConsole(""); // so the console "looks pretty".
 			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public static void thirdTask()
+		{
+			
 		}
 
 		/// <summary>
@@ -186,6 +225,7 @@ namespace DiseaseDatabase
 			_uow.Diseases.Clear();
 			_uow.DiseaseSymptoms.Clear();
 			_uow.Symptoms.Clear();
+
 			_uow.Commit();
 		}
 
@@ -196,7 +236,16 @@ namespace DiseaseDatabase
 		/// <returns>Boolean indicating if input string is exit command</returns>
 		private static bool inputIsExitCommand(string input)
 		{
-			return string.Equals(input.Trim(), ConsoleCommands.ExitLoop, StringComparison.OrdinalIgnoreCase);
+			return string.Equals(input.Trim(), ConsoleCommands.ExitTask, StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// So I wouldn't have to put '+ System.Environment.NewLine' into every Console.WriteLine command.
+		/// </summary>
+		/// <param name="text"></param>
+		private static void writeLineOnConsole(string text)
+		{
+			Console.WriteLine(text + Environment.NewLine);
 		}
 
 	}// program.cs

@@ -19,7 +19,8 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -52,6 +53,8 @@
     <Compile Include="DiseaseDbContext.cs" />
     <Compile Include="Helpers\EFRepositoryFactories.cs" />
     <Compile Include="Helpers\EFRepositoryProvider.cs" />
+    <Compile Include="Helpers\Model factories\DiseaseWithSymptomNamesFactory.cs" />
+    <Compile Include="Helpers\Models\DiseaseWithSymptomNames.cs" />
     <Compile Include="Interfaces\Domain objects\IDiseaseRepository.cs" />
     <Compile Include="Interfaces\Domain objects\IDiseaseSymptomRepository.cs" />
     <Compile Include="Interfaces\Domain objects\ISymptomRepository.cs" />

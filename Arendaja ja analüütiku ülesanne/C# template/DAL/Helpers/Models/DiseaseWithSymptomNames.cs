@@ -11,6 +11,6 @@ namespace DAL.Helpers.Models
 		public int DiseaseId { get; set; }
 		public string Name { get; set; }
 
-		public List<string> Symptoms { get; set; }
+		public List<string> Symptoms { get; set; } = new List<string>();
 	}
 }

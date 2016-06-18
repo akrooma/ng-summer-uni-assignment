@@ -9,5 +9,6 @@ namespace DiseaseDatabase.Helpers
 	public static class ConsoleCommands
 	{
 		public static string ExitLoop => "Exit loop";
+		public static string ExitTask => "Exit task";
 	}
 }

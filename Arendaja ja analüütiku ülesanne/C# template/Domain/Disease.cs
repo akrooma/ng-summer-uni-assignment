@@ -14,6 +14,6 @@ namespace Domain
 		public int DiseaseId { get; set; }
 		public string Name { get; set; } // if more suited, could be called DiseaseName
 
-		public virtual ICollection<DiseaseSymptom> Symptoms { get; set; }
-    }
+		public virtual ICollection<DiseaseSymptom> Symptoms { get; set; } = new List<DiseaseSymptom>();
+	}
 }
