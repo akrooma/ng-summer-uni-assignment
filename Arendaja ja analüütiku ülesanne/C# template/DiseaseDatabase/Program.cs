@@ -1,13 +1,11 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using DAL;
-using DAL.Helpers;
-using DAL.Helpers.Model_factories;
+using DAL.Helpers.Models;
+using DAL.Helpers.Modified_domain_models;
 using DAL.Interfaces;
 using DiseaseDatabase.Helpers;
 using Domain;
@@ -30,7 +28,58 @@ namespace DiseaseDatabase
 			//populateDatabase(csvLines);
 
 			//firstTask();
-			secondTask();
+			//secondTask();
+
+			while (true)
+			{
+				thirdTask();
+			}
+
+			/*
+			var testObjects = new List<TestObject>();
+
+			var to1 = new TestObject("Nimi1");
+			var to2 = new TestObject("Nimi2");
+			var to3 = new TestObject("Nimi3");
+
+			to1.Strings = new List<string> { }; //
+			to2.Strings = new List<string> {  }; // "Second superspecial"
+			to3.Strings = new List<string> { "Third superspecial", "second", "third", "fourth" };
+
+			var eo1 = new ExtraObject("EO1");
+			var eo2 = new ExtraObject("EO2");
+			var eo3 = new ExtraObject("EO3");
+			var eo4 = new ExtraObject("EO4");
+
+			to1.Objects = new List<ExtraObject> { eo1, eo2 };
+			to2.Objects = new List<ExtraObject> { eo3, eo4 };
+
+			testObjects.Add(to1);
+			testObjects.Add(to2);
+			testObjects.Add(to3);
+
+			//var result = testObjects.Where(to => to.Strings.Contains("first") && to.Strings.Remove("first")).ToList();
+			var result = testObjects;
+
+			foreach (var testObject in result)
+			{
+				if (testObject.Strings.Count != 0)
+				{
+					Console.WriteLine(testObject.Strings.First());
+					return;
+				}
+			}
+
+			foreach (var r in result)
+			{
+				Console.WriteLine("Testobject text: " + r.Text);
+
+				foreach (var s in r.Strings)
+				{
+					Console.WriteLine("\t" + s);
+				}
+			}
+			*/
 		}
 
 		/// <summary>
@@ -52,7 +101,7 @@ namespace DiseaseDatabase
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex.Message + System.Environment.NewLine);
+					writeLineOnConsole(ex.Message);
 				}
 			}
 			else
@@ -118,7 +167,7 @@ namespace DiseaseDatabase
 		/// Subtask 1.1: top three diseases by symptom count, ordered by the count and then by disease name alphabetically.
 		/// Actual method is in the DiseaseRepo.
 		/// </summary>
-		public static void topThreeDiseases()
+		private static void topThreeDiseases()
 		{
 			var diseases = _uow.Diseases.topThreeDiseases();
 
@@ -133,7 +182,7 @@ namespace DiseaseDatabase
 		/// <summary>
 		/// Subtask 1.2: the amount of unique symptoms.
 		/// </summary>
-		public static void uniqueSymptomCount()
+		private static void uniqueSymptomCount()
 		{
 			writeLineOnConsole("1.2. The amount of unique symptoms:");
 			writeLineOnConsole("\t" + _uow.Symptoms.All.Count);
@@ -143,7 +192,7 @@ namespace DiseaseDatabase
 		/// Subtask 1.3: top three symptoms by disease count. Ordered by disease count and then by symptom name.
 		/// Actual querying method is in the SymptomRepository.
 		/// </summary>
-		public static void topThreeSymptoms()
+		private static void topThreeSymptoms()
 		{
 			var symptoms = _uow.Symptoms.topThreeSymptoms();
 
@@ -159,9 +208,10 @@ namespace DiseaseDatabase
 		/// Solution for the second task. This method mainly holds code for console manipulation.
 		/// Querying and such is done in the DiseaseRepo.
 		/// </summary>
-		public static void secondTask()
+		private static void secondTask()
 		{
-			writeLineOnConsole("2.2. Potential diseases based on symptoms: (type 'Exit task' to stop the cycle)");
+			writeLineOnConsole("2.2. Potential diseases based on symptoms: " +
+			                    Environment.NewLine + "(type 'Exit task' to exit task loop)");
 
 			while (true)
 			{
@@ -198,12 +248,58 @@ namespace DiseaseDatabase
 			}
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		public static void thirdTask()
+
+		private static void thirdTask()
 		{
+			var diseases = _uow.Diseases.allDiseasesOptimizedForDiagnosis();
+
+			writeLineOnConsole("3. Diagnosis for the patient: answer 'yes' or 'no' for presented symptoms.");
+
+			proposeSymptom(diseases);
+		}
+
+		private static void proposeSymptom(List<OptimizedDisease> diseases)
+		{
+			if (diseases.Count == 1)
+			{ 
+				writeLineOnConsole(Environment.NewLine + "Proposed diagnoses: " + diseases.FirstOrDefault().Name);
+				return;
+			} else if (diseases.Count == 0)
+			{
+				writeLineOnConsole("Something went wrong proposing the diagnosis?");
+				return;
+			}
+
+			//var disease = diseases.FirstOrDefault();
+			//var symptom = disease.Symptoms.FirstOrDefault(); // cannot be null since every disease has at least 1 symptom.
+			var symptom = getProposedSymptom(diseases);
+
+			writeLineOnConsole("Does the patient have a symptom called: " + symptom.Name + "?");
+
+			var consoleInput = Console.ReadLine();
+
+			// selects all the diseases that don't have the proposed symptom
+			if (consoleInput == "no")
+				diseases = diseases.Where(d => !d.Symptoms.Contains(symptom)).ToList();
+
+			// selects all the diseases that have the proposed symptom, removes the symptom from the disease's 
+			// symptom list so that the algoritm wouldn't ask about it again.
+			else if (consoleInput == "yes")
+				diseases = diseases.Where(d => d.Symptoms.Contains(symptom) && d.Symptoms.Remove(symptom)).ToList();
+
+			proposeSymptom(diseases);
+		}
+
+		public static Symptom getProposedSymptom(List<OptimizedDisease> diseases)
+		{
+			foreach (var disease in diseases)
+			{
+				if (disease.Symptoms.Count != 0)
+					return disease.Symptoms.FirstOrDefault();
+			}
 			
+			// this method never reaches this point. Exists only so that the compiler gives no error.
+			return null;
 		}
 
 		/// <summary>

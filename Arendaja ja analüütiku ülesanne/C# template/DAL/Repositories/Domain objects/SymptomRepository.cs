@@ -31,7 +31,9 @@ namespace DAL.Repositories.Domain_objects
 
 		public List<Symptom> topThreeSymptoms()
 		{
-			var query = DbSet.OrderByDescending(s => s.Diseases.Count).ThenBy(s => s.Name).Take(3);
+			var query = DbSet.OrderByDescending(s => s.Diseases.Count)
+				.ThenBy(s => s.Name)
+				.Take(3);
 			
 			return query.ToList();
 		}

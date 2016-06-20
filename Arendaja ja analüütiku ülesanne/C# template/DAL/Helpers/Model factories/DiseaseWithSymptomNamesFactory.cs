@@ -10,7 +10,7 @@ namespace DAL.Helpers.Model_factories
 {
 	public static class DiseaseWithSymptomNamesFactory
 	{
-		public static DiseaseWithSymptomNames createEntity(Disease disease)
+		public static DiseaseWithSymptomNames createObject(Disease disease)
 		{
 			var result = new DiseaseWithSymptomNames
 			{

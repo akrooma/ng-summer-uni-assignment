@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using DAL.Helpers.Models;
+using DAL.Helpers.Modified_domain_models;
 using Domain;
 
 namespace DAL.Interfaces.Domain_objects
@@ -27,6 +28,17 @@ namespace DAL.Interfaces.Domain_objects
 		/// <param name="symptoms"></param>
 		/// <returns>List of possible diseases</returns>
 		List<Disease> possibleDiseases(string[] symptoms);
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <returns>List of all diseases with a simpler list of symptoms</returns>
+		List<DiseaseWithSymptomNames> allDiseasesWithJustSymptomNames();
+
+
+		List<OptimizedDisease> allDiseasesOptimizedForDiagnosis();
+
+
 		//List<DiseaseWithSymptomNames> possibleDiseases(string[] symptoms);
 	}
 }
