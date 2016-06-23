@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DAL.Helpers.Models
+namespace BLL.ModifiedDomainModels
 {
 	/// <summary>
 	/// Rather than having a list of DiseaseSymptom objects where you'd have to access DiseaseSymptom's Symptom object

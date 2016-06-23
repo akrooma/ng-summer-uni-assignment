@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DAL.Helpers.Models;
-using DAL.Helpers.Model_factories;
-using DAL.Helpers.Modified_domain_models;
+using BLL;
+using BLL.ModifiedDomainModels;
+using BLL.ModifiedModelFactories;
 using DAL.Interfaces;
 using DAL.Interfaces.Domain_objects;
 using Domain;
@@ -21,8 +18,8 @@ namespace DAL.Repositories.Domain_objects
 		/// <summary>
 		/// Implements <see cref="IDiseaseRepository.addIfNotExists(string)"/>
 		/// </summary>
-		/// <param name="diseaseName"></param>
-		/// <returns></returns>
+		/// <param name="diseaseName">Name of a disease</param>
+		/// <returns>Disease's id</returns>
 		public int addIfNotExists(string diseaseName)
 		{
 			var disease = DbSet.SingleOrDefault(s => s.Name == diseaseName);
@@ -52,20 +49,20 @@ namespace DAL.Repositories.Domain_objects
 			
 			foreach (var symptom in symptoms)
 			{
-				query = query.Where(c => c.Symptoms.Any(s => s.Symptom.Name == symptom));
+				query = query.Where(c => c.Symptoms.Any(s => s.Symptom.Name == symptom.Trim()));
 			}
 			
 			return query.ToList();
-			
+
 			#region alternative_solution
 			// Note: with this, the method's return type is List<DiseaseWithSymptomNamesFactory>
 			// in order to use this, changes have to be made to the IDiseaseRepository file as well.
 
 			//var result = DbSet.ToList().Select(d => DiseaseWithSymptomNamesFactory.createEntity(d));
 
-			//foreach (var item in symptoms)
+			//foreach (var symptomName in symptoms)
 			//{
-			//	result = result.Where(d => d.Symptoms.Contains(item));
+			//	result = result.Where(d => d.Symptoms.Contains(symptomName));
 			//}
 
 			//return result.ToList();
@@ -78,9 +75,9 @@ namespace DAL.Repositories.Domain_objects
 			return All.Select(d => DiseaseWithSymptomNamesFactory.createObject(d)).ToList();
 		}
 
-		public List<OptimizedDisease> allDiseasesOptimizedForDiagnosis()
+		public List<DiseaseForDiagnosis> allDiseasesOptimizedForDiagnosis()
 		{
-			return All.Select(d => OptimizedDiseaseFactory.createObjectForDiagnosing(d))
+			return All.Select(d => DiseaseForDiagnosisFactory.createObjectForDiagnosing(d))
 				.OrderBy(d => d.LeastPopularSymptomOccurrences)
 				.ThenBy(d => d.Symptoms.Count)
 				.ToList();

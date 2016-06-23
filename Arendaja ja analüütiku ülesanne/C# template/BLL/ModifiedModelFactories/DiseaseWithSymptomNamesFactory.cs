@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DAL.Helpers.Models;
+using BLL.ModifiedDomainModels;
 using Domain;
 
-namespace DAL.Helpers.Model_factories
+namespace BLL.ModifiedModelFactories
 {
 	public static class DiseaseWithSymptomNamesFactory
 	{
@@ -15,14 +15,11 @@ namespace DAL.Helpers.Model_factories
 			var result = new DiseaseWithSymptomNames
 			{
 				DiseaseId = disease.DiseaseId,
-				Name = disease.Name
+				Name = disease.Name,
+				
+				Symptoms = disease.Symptoms.Select(s => s.Symptom.Name).ToList()
 			};
-
-			foreach (var symptom in disease.Symptoms)
-			{
-				result.Symptoms.Add(symptom.Symptom.Name);
-			}
-
+			
 			return result;
 		}
 	}

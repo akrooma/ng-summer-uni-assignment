@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using DAL;
-using DAL.Helpers.Models;
-using DAL.Helpers.Modified_domain_models;
+using BLL.ModifiedDomainModels;
 using DAL.Interfaces;
 using DiseaseDatabase.Helpers;
 using Domain;
@@ -27,59 +25,17 @@ namespace DiseaseDatabase
 			//var csvLines = getInputFileContent(new []{ "Diseases.csv" });
 			//populateDatabase(csvLines);
 
-			//firstTask();
-			//secondTask();
+			firstTask();
+			secondTask();
 
+			/*
+			 * This method doesn't loop by itself like secondTask() does. Turning off the console app
+			 * or ctrl+c (for my machine at least) would terminate it.
+			 */
 			while (true)
 			{
 				thirdTask();
 			}
-
-			/*
-			var testObjects = new List<TestObject>();
-
-			var to1 = new TestObject("Nimi1");
-			var to2 = new TestObject("Nimi2");
-			var to3 = new TestObject("Nimi3");
-
-			to1.Strings = new List<string> { }; //
-			to2.Strings = new List<string> {  }; // "Second superspecial"
-			to3.Strings = new List<string> { "Third superspecial", "second", "third", "fourth" };
-
-			var eo1 = new ExtraObject("EO1");
-			var eo2 = new ExtraObject("EO2");
-			var eo3 = new ExtraObject("EO3");
-			var eo4 = new ExtraObject("EO4");
-
-			to1.Objects = new List<ExtraObject> { eo1, eo2 };
-			to2.Objects = new List<ExtraObject> { eo3, eo4 };
-
-			testObjects.Add(to1);
-			testObjects.Add(to2);
-			testObjects.Add(to3);
-
-			//var result = testObjects.Where(to => to.Strings.Contains("first") && to.Strings.Remove("first")).ToList();
-			var result = testObjects;
-
-			foreach (var testObject in result)
-			{
-				if (testObject.Strings.Count != 0)
-				{
-					Console.WriteLine(testObject.Strings.First());
-					return;
-				}
-			}
-
-			foreach (var r in result)
-			{
-				Console.WriteLine("Testobject text: " + r.Text);
-
-				foreach (var s in r.Strings)
-				{
-					Console.WriteLine("\t" + s);
-				}
-			}
-			*/
 		}
 
 		/// <summary>
@@ -207,6 +163,8 @@ namespace DiseaseDatabase
 		/// <summary>
 		/// Solution for the second task. This method mainly holds code for console manipulation.
 		/// Querying and such is done in the DiseaseRepo.
+		/// Doesn't have full input validation yet. Expects correct input: empty string, 'exit loop' or for example:
+		/// 'symptomName1,symptomName2,symptomName3' etc.
 		/// </summary>
 		private static void secondTask()
 		{
@@ -219,10 +177,13 @@ namespace DiseaseDatabase
 
 				var consoleInput = Console.ReadLine();
 
+				// If the user entered 'exit loop'.
 				if (inputIsExitCommand(consoleInput)) return;
 
-				if (consoleInput.Length == 0) continue; // process starts all over again if the user pressed just enter.
+				// Process starts all over again if the user pressed just enter.
+				if (consoleInput.Length == 0) continue; 
 
+				// Gets a list of diseases with given symptoms.
 				var diseases = _uow.Diseases.possibleDiseases(consoleInput.Split(','));
 
 				if (diseases.Any())
@@ -248,7 +209,9 @@ namespace DiseaseDatabase
 			}
 		}
 
-
+		/// <summary>
+		/// Main work is done by the next method: <see cref="proposeSymptom(List&lt;DiseaseForDiagnosis&gt;)"/>
+		/// </summary>
 		private static void thirdTask()
 		{
 			var diseases = _uow.Diseases.allDiseasesOptimizedForDiagnosis();
@@ -258,18 +221,8 @@ namespace DiseaseDatabase
 			proposeSymptom(diseases);
 		}
 
-		private static void proposeSymptom(List<OptimizedDisease> diseases)
+		private static void proposeSymptom(List<DiseaseForDiagnosis> diseases)
 		{
-			if (diseases.Count == 1)
-			{ 
-				writeLineOnConsole(Environment.NewLine + "Proposed diagnoses: " + diseases.FirstOrDefault().Name);
-				return;
-			} else if (diseases.Count == 0)
-			{
-				writeLineOnConsole("Something went wrong proposing the diagnosis?");
-				return;
-			}
-
 			//var disease = diseases.FirstOrDefault();
 			//var symptom = disease.Symptoms.FirstOrDefault(); // cannot be null since every disease has at least 1 symptom.
 			var symptom = getProposedSymptom(diseases);
@@ -278,19 +231,46 @@ namespace DiseaseDatabase
 
 			var consoleInput = Console.ReadLine();
 
-			// selects all the diseases that don't have the proposed symptom
+			// Selects all the diseases that don't have the proposed symptom.
 			if (consoleInput == "no")
 				diseases = diseases.Where(d => !d.Symptoms.Contains(symptom)).ToList();
 
-			// selects all the diseases that have the proposed symptom, removes the symptom from the disease's 
-			// symptom list so that the algoritm wouldn't ask about it again.
+			/*
+			 * Selects all the diseases that have the proposed symptom, removes the symptom from the disease's 
+			 * symptom list so that the algoritm wouldn't ask about it again.
+			 */
 			else if (consoleInput == "yes")
 				diseases = diseases.Where(d => d.Symptoms.Contains(symptom) && d.Symptoms.Remove(symptom)).ToList();
 
-			proposeSymptom(diseases);
+			// A disease was found.
+			if (diseases.Count == 1)
+			{
+				writeLineOnConsole(Environment.NewLine + "Proposed diagnoses: " + diseases.FirstOrDefault().Name);
+			}
+
+			/*
+			 * Just in case. Algorithm shouldn't come to this point. It will if the database holds just one disease and
+			 * the user answers 'no' for a symptom of that disease. This count check block used to be at the beginning of 
+			 * the method.
+			 */
+			else if (diseases.Count == 0)
+			{
+				writeLineOnConsole("Something went wrong proposing the diagnosis?");
+			}
+			// Algorithm hasn't narrowed it down to just 1 disease yet. 
+			else
+			{
+				proposeSymptom(diseases);
+			}
 		}
 
-		public static Symptom getProposedSymptom(List<OptimizedDisease> diseases)
+		/// <summary>
+		/// Since the symptoms with the answer 'yes' are removed from the disease's symptom list, some
+		/// disease symptom lists might end up empty -- cannot grab first disease's first symptom, have to go beyond.
+		/// </summary>
+		/// <param name="diseases">List of possible diseases.</param>
+		/// <returns>A symptom.</returns>
+		public static Symptom getProposedSymptom(List<DiseaseForDiagnosis> diseases)
 		{
 			foreach (var disease in diseases)
 			{
@@ -316,6 +296,10 @@ namespace DiseaseDatabase
 			//clearDatabase();
 		}
 
+		/// <summary>
+		/// Every time the program is run, a new csv file is given. I presume the last file's
+		/// data isn't 
+		/// </summary>
 		private static void clearDatabase()
 		{
 			_uow.Diseases.Clear();

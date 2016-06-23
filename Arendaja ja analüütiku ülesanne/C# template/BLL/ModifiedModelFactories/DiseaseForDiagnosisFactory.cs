@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DAL.Helpers.Modified_domain_models;
+using BLL.ModifiedDomainModels;
 using Domain;
 
-namespace DAL.Helpers.Model_factories
+namespace BLL.ModifiedModelFactories
 {
-	public static class OptimizedDiseaseFactory
+	public static class DiseaseForDiagnosisFactory
 	{
-		public static OptimizedDisease createObjectForDiagnosing(Disease disease)
+		public static DiseaseForDiagnosis createObjectForDiagnosing(Disease disease)
 		{
-			return new OptimizedDisease
+			return new DiseaseForDiagnosis
 			{
 				DiseaseId = disease.DiseaseId,
 				Name = disease.Name,

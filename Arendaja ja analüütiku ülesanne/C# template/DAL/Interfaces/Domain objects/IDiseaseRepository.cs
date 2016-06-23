@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using DAL.Helpers.Models;
-using DAL.Helpers.Modified_domain_models;
+using BLL.ModifiedDomainModels;
 using Domain;
 
 namespace DAL.Interfaces.Domain_objects
@@ -9,7 +7,7 @@ namespace DAL.Interfaces.Domain_objects
 	public interface IDiseaseRepository : IEFRepository<Disease>
 	{
 		/// <summary>
-		/// Checks of a disease with the given diseaseName exists already. If not, one is created.
+		/// Checks of a disease with the given disease name exists already. If not, one is created.
 		/// </summary>
 		/// <param name="diseaseName">Disease's name</param>
 		/// <returns>Disease's id</returns>
@@ -36,7 +34,7 @@ namespace DAL.Interfaces.Domain_objects
 		List<DiseaseWithSymptomNames> allDiseasesWithJustSymptomNames();
 
 
-		List<OptimizedDisease> allDiseasesOptimizedForDiagnosis();
+		List<DiseaseForDiagnosis> allDiseasesOptimizedForDiagnosis();
 
 
 		//List<DiseaseWithSymptomNames> possibleDiseases(string[] symptoms);
