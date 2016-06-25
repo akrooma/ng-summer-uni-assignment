@@ -15,7 +15,7 @@ namespace DAL.Interfaces.Domain_objects
 
 		/// <summary>
 		/// Finds 3 diseases with the most amount of symptoms.
-		/// Ordered by symptom amount. If the amounts are equal, then the diseases are ordered alphabetically.
+		/// Ordered by symptom amount. Then by disease name alphabetically.
 		/// </summary>
 		/// <returns></returns>
 		List<Disease> topThreeDiseases();
@@ -28,12 +28,18 @@ namespace DAL.Interfaces.Domain_objects
 		List<Disease> possibleDiseases(string[] symptoms);
 
 		/// <summary>
-		/// 
+		/// Returns a list of simpler disease objects; rather than having a list of compelex objects, each disease
+		/// has a list of just symptom names as strings.
 		/// </summary>
-		/// <returns>List of all diseases with a simpler list of symptoms</returns>
+		/// <returns>List of all diseases</returns>
 		List<DiseaseWithSymptomNames> allDiseasesWithJustSymptomNames();
 
-
+		/// <summary>
+		/// Gets all the diseases in a "simpler" format (a list of symptom objects). The diseases are ordered in a way
+		/// I thought made sense for task three. Diseases are ordered by their least popular symptom -- for example, if a symptom 
+		/// has just 1 disease in the system, that disease is first in the list.
+		/// </summary>
+		/// <returns>List of diseases in a specific order</returns>
 		List<DiseaseForDiagnosis> allDiseasesOptimizedForDiagnosis();
 
 

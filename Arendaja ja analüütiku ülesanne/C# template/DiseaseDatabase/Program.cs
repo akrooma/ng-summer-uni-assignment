@@ -25,6 +25,7 @@ namespace DiseaseDatabase
 			//var csvLines = getInputFileContent(new []{ "Diseases.csv" });
 			//populateDatabase(csvLines);
 
+			
 			firstTask();
 			secondTask();
 
@@ -62,7 +63,7 @@ namespace DiseaseDatabase
 			}
 			else
 			{
-				writeLineOnConsole("No arguments or too many given. Args[] length: ");
+				writeLineOnConsole("No arguments or too many given. Args[] length: " + args.Length);
 			}
 			
 			writeLineOnConsole("Insert the file's name or path:");
@@ -86,11 +87,13 @@ namespace DiseaseDatabase
 			{
 				var csvLinePieces = csvLine.Split(',');
 
+				var diseaseId = _uow.Diseases.addIfNotExists(csvLinePieces[0].Trim());
+
 				for (var i = 1; i < csvLinePieces.Length; i++)
 				{
 					var diseaseSymptom = new DiseaseSymptom
 					{
-						DiseaseId = _uow.Diseases.addIfNotExists(csvLinePieces[0].Trim()),
+						DiseaseId = diseaseId,
 						SymptomId = _uow.Symptoms.addIfNotExists(csvLinePieces[i].Trim())
 					};
 					
@@ -101,16 +104,10 @@ namespace DiseaseDatabase
 			_uow.Commit();
 
 			writeLineOnConsole("Filling up the database was a success!");
-
-			/*
-			Console.WriteLine("Number of diseases: " + _uow.Diseases.All.Count + System.Environment.NewLine + 
-					"Number of symptoms: " + _uow.Symptoms.All.Count + System.Environment.NewLine + 
-					"Number of combinations: " + _uow.DiseaseSymptoms.All.Count);
-			*/
 		}
 
 		/// <summary>
-		/// Method to solve the first task.
+		/// Has no real functionality. Simply calls out the subtask methods.
 		/// </summary>
 		private static void firstTask()
 		{
@@ -121,13 +118,13 @@ namespace DiseaseDatabase
 
 		/// <summary>
 		/// Subtask 1.1: top three diseases by symptom count, ordered by the count and then by disease name alphabetically.
-		/// Actual method is in the DiseaseRepo.
+		/// Linq expression is in the disease repo.
 		/// </summary>
 		private static void topThreeDiseases()
 		{
 			var diseases = _uow.Diseases.topThreeDiseases();
 
-			writeLineOnConsole("1.1. Top three diseases by symptom count:");
+			Console.WriteLine("1.1. Top three diseases by symptom count:");
 
 			foreach (var disease in diseases)
 			{
@@ -140,19 +137,19 @@ namespace DiseaseDatabase
 		/// </summary>
 		private static void uniqueSymptomCount()
 		{
-			writeLineOnConsole("1.2. The amount of unique symptoms:");
+			Console.WriteLine(Environment.NewLine + "1.2. The amount of unique symptoms:");
 			writeLineOnConsole("\t" + _uow.Symptoms.All.Count);
 		}
 
 		/// <summary>
 		/// Subtask 1.3: top three symptoms by disease count. Ordered by disease count and then by symptom name.
-		/// Actual querying method is in the SymptomRepository.
+		/// Linq expression is in the symptom repo.
 		/// </summary>
 		private static void topThreeSymptoms()
 		{
 			var symptoms = _uow.Symptoms.topThreeSymptoms();
 
-			writeLineOnConsole("1.3. Top three symptoms by disease count:");
+			Console.WriteLine("1.3. Top three symptoms by disease count:");
 
 			foreach (var symptom in symptoms)
 			{
@@ -168,7 +165,7 @@ namespace DiseaseDatabase
 		/// </summary>
 		private static void secondTask()
 		{
-			writeLineOnConsole("2.2. Potential diseases based on symptoms: " +
+			writeLineOnConsole(Environment.NewLine + "2.2. Potential diseases based on symptoms: " +
 			                    Environment.NewLine + "(type 'Exit task' to exit task loop)");
 
 			while (true)
@@ -188,7 +185,7 @@ namespace DiseaseDatabase
 
 				if (diseases.Any())
 				{
-					Console.WriteLine(Environment.NewLine + "Result: possible diseases for given symptoms:");
+					Console.WriteLine(Environment.NewLine + "!!!Result: possible disease(s) for given symptom(s):");
 
 					foreach (var disease in diseases)
 					{
@@ -197,15 +194,15 @@ namespace DiseaseDatabase
 				}
 				else
 				{
-					Console.WriteLine(Environment.NewLine + "Couldn't find any diseases for given symptoms: ");
+					Console.WriteLine(Environment.NewLine + "???Result: couldn't find any diseases with given symptoms: ");
 					
 					foreach (var symptom in consoleInput.Split(','))
 					{
 						Console.WriteLine("\t" + symptom);
 					}
 				}
-				
-				writeLineOnConsole(""); // so the console "looks pretty".
+
+				writeLineOnConsole("");
 			}
 		}
 
@@ -216,7 +213,7 @@ namespace DiseaseDatabase
 		{
 			var diseases = _uow.Diseases.allDiseasesOptimizedForDiagnosis();
 
-			writeLineOnConsole("3. Diagnosis for the patient: answer 'yes' or 'no' for presented symptoms.");
+			Console.WriteLine(Environment.NewLine + "3. Diagnosis for the patient: answer 'yes' or 'no' for presented symptoms.");
 
 			proposeSymptom(diseases);
 		}
@@ -227,7 +224,7 @@ namespace DiseaseDatabase
 			//var symptom = disease.Symptoms.FirstOrDefault(); // cannot be null since every disease has at least 1 symptom.
 			var symptom = getProposedSymptom(diseases);
 
-			writeLineOnConsole("Does the patient have a symptom called: " + symptom.Name + "?");
+			writeLineOnConsole(Environment.NewLine + "Does the patient have a symptom called: " + symptom.Name + "?");
 
 			var consoleInput = Console.ReadLine();
 
@@ -245,7 +242,7 @@ namespace DiseaseDatabase
 			// A disease was found.
 			if (diseases.Count == 1)
 			{
-				writeLineOnConsole(Environment.NewLine + "Proposed diagnoses: " + diseases.FirstOrDefault().Name);
+				writeLineOnConsole(Environment.NewLine + "!!!Result: Proposed diagnoses: " + diseases.FirstOrDefault().Name);
 			}
 
 			/*
@@ -255,7 +252,7 @@ namespace DiseaseDatabase
 			 */
 			else if (diseases.Count == 0)
 			{
-				writeLineOnConsole("Something went wrong proposing the diagnosis?");
+				writeLineOnConsole("???Result: Something went wrong proposing the diagnosis?");
 			}
 			// Algorithm hasn't narrowed it down to just 1 disease yet. 
 			else
@@ -293,7 +290,7 @@ namespace DiseaseDatabase
 			kernel.Load(Assembly.GetExecutingAssembly());
 			_uow = kernel.Get<IUOW>();
 
-			//clearDatabase();
+			clearDatabase();
 		}
 
 		/// <summary>

@@ -15,6 +15,11 @@ namespace DAL.Repositories.Domain_objects
 
 		// Note: see interface for implementation summaries
 
+		/// <summary>
+		/// Implements <see cref="ISymptomRepository.addIfNotExists(string)"/>
+		/// </summary>
+		/// <param name="symptomName"></param>
+		/// <returns></returns>
 		public int addIfNotExists(string symptomName)
 		{
 			var symptom = DbSet.SingleOrDefault(s => s.Name == symptomName);
@@ -29,6 +34,10 @@ namespace DAL.Repositories.Domain_objects
 			return symptom.SymptomId;
 		}
 
+		/// <summary>
+		/// Implements <see cref="ISymptomRepository.topThreeSymptoms()"/>
+		/// </summary>
+		/// <returns>Top 3 symptoms by disease count</returns>
 		public List<Symptom> topThreeSymptoms()
 		{
 			var query = DbSet.OrderByDescending(s => s.Diseases.Count)

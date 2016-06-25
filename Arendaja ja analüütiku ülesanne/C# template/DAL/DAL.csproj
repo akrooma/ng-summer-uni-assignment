@@ -53,10 +53,6 @@
     <Compile Include="DiseaseDbContext.cs" />
     <Compile Include="Helpers\EFRepositoryFactories.cs" />
     <Compile Include="Helpers\EFRepositoryProvider.cs" />
-    <Compile Include="Helpers\Model factories\DiseaseWithSymptomNamesFactory.cs" />
-    <Compile Include="Helpers\Model factories\OptimizedDiseaseFactory.cs" />
-    <Compile Include="Helpers\Modified domain models\DiseaseWithSymptomNames.cs" />
-    <Compile Include="Helpers\Modified domain models\OptimizedDisease.cs" />
     <Compile Include="Interfaces\Domain objects\IDiseaseRepository.cs" />
     <Compile Include="Interfaces\Domain objects\IDiseaseSymptomRepository.cs" />
     <Compile Include="Interfaces\Domain objects\ISymptomRepository.cs" />
@@ -76,6 +72,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BLL\BLL.csproj">
+      <Project>{1b657005-ae8c-4df1-911a-9d1c8c1d9e13}</Project>
+      <Name>BLL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Domain\Domain.csproj">
       <Project>{4ED07A70-776F-4D00-830F-00E57A64364C}</Project>
       <Name>Domain</Name>

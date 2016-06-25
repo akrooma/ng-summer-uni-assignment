@@ -119,8 +119,6 @@ namespace DAL.Repositories
 			Delete(entity);
 		}
 
-
-
 		public EntityKey GetPrimaryKeyInfo(T entity)
 		{
 			var properties = typeof(DbSet).GetProperties();
@@ -163,5 +161,14 @@ namespace DAL.Repositories
 			if (DbSet.Any())
 				DbSet.RemoveRange(DbSet);
 		}
+
+		/*
+		public int AddIfNotExists(string name)
+		{
+			var entity = DbSet.FirstOrDefault();
+
+			return 1;
+		}
+		*/
 	}
 }

@@ -34,6 +34,10 @@ namespace DAL.Repositories.Domain_objects
 			return disease.DiseaseId;
 		}
 
+		/// <summary>
+		/// Implements <see cref="IDiseaseRepository.topThreeDiseases()"/>
+		/// </summary>
+		/// <returns>List of 3 most popular diseases by symptom count.</returns>
 		public List<Disease> topThreeDiseases()
 		{
 			var query = DbSet.OrderByDescending(d => d.Symptoms.Count)
@@ -43,6 +47,11 @@ namespace DAL.Repositories.Domain_objects
 			return query.ToList();
 		}
 
+		/// <summary>
+		/// Implements <see cref="IDiseaseRepository.possibleDiseases(string [])"/>
+		/// </summary>
+		/// <param name="symptoms">Array of symptom names.</param>
+		/// <returns>List of diseases with given symptoms.</returns>
 		public List<Disease> possibleDiseases(string [] symptoms)
 		{
 			var query = (IQueryable<Disease>) DbSet;
@@ -55,8 +64,10 @@ namespace DAL.Repositories.Domain_objects
 			return query.ToList();
 
 			#region alternative_solution
-			// Note: with this, the method's return type is List<DiseaseWithSymptomNamesFactory>
+			// Note: with this, the method's return type is List<DiseaseWithSymptomNames>
 			// in order to use this, changes have to be made to the IDiseaseRepository file as well.
+			// It comes down to converting all the entries in the dbset to a new object format VS
+			// the complexity of the active solution's sql statement + object tree traversal.
 
 			//var result = DbSet.ToList().Select(d => DiseaseWithSymptomNamesFactory.createEntity(d));
 
@@ -70,11 +81,19 @@ namespace DAL.Repositories.Domain_objects
 			#endregion
 		}
 
+		/// <summary>
+		/// Implements <see cref="IDiseaseRepository.allDiseasesWithJustSymptomNames()"/>
+		/// </summary>
+		/// <returns>List of diseases</returns>
 		public List<DiseaseWithSymptomNames> allDiseasesWithJustSymptomNames()
 		{
 			return All.Select(d => DiseaseWithSymptomNamesFactory.createObject(d)).ToList();
 		}
 
+		/// <summary>
+		/// Implements <see cref="IDiseaseRepository.allDiseasesOptimizedForDiagnosis()"/>
+		/// </summary>
+		/// <returns>List of diseases</returns>
 		public List<DiseaseForDiagnosis> allDiseasesOptimizedForDiagnosis()
 		{
 			return All.Select(d => DiseaseForDiagnosisFactory.createObjectForDiagnosing(d))
