@@ -22,12 +22,13 @@ namespace DAL.Repositories.Domain_objects
 		/// <returns>Disease's id</returns>
 		public int addIfNotExists(string diseaseName)
 		{
-			var disease = DbSet.SingleOrDefault(s => s.Name == diseaseName);
+			//var disease = DbSet.SingleOrDefault(s => s.Name == diseaseName);
 
-			if (disease != null)
-				return disease.DiseaseId;
+			//if (disease != null)
+			//	return disease.DiseaseId;
 
-			disease = new Disease { Name = diseaseName };
+			//disease = new Disease { Name = diseaseName };
+			var disease = new Disease { Name = diseaseName };
 			Add(disease);
 			SaveChanges();
 
