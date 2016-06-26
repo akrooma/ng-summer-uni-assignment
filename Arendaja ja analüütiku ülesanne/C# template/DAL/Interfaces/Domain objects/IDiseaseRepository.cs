@@ -8,6 +8,8 @@ namespace DAL.Interfaces.Domain_objects
 	{
 		/// <summary>
 		/// Checks of a disease with the given disease name exists already. If not, one is created.
+		/// Note: right now it only creates a new disease with the given name, since the diseases given by the csv file
+		/// are all unique.
 		/// </summary>
 		/// <param name="diseaseName">Disease's name</param>
 		/// <returns>Disease's id</returns>
