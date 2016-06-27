@@ -25,7 +25,8 @@ namespace DiseaseDatabase
 			//var csvLines = getInputFileContent(new []{ "Diseases.csv" });
 			//populateDatabase(csvLines);
 
-			
+			populateDatabase(getInputFileContent(args));
+
 			firstTask();
 			secondTask();
 
