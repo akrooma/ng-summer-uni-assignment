@@ -38,6 +38,8 @@ namespace DiseaseDatabase
 			{
 				thirdTask();
 			}
+
+
 		}
 
 		/// <summary>
@@ -270,6 +272,21 @@ namespace DiseaseDatabase
 		/// <returns>A symptom.</returns>
 		public static Symptom getProposedSymptom(List<DiseaseForDiagnosis> diseases)
 		{
+			/*
+			 * A sort of "bad" fix, but it "works". This piece of codes eliminates situations where
+			 * the program has to guess between two diseases and it'll always pick a symptom unique to one of them.
+			 * With the foreach there's a chance it'll go over a bunch of symptoms both share first.
+			 */
+			if (diseases.Count == 2)
+			{
+				var firstDiseasesSymptoms = diseases.ElementAt(0).Symptoms;
+				var secondDiseasesSymptoms = diseases.ElementAt(1).Symptoms;
+
+				return firstDiseasesSymptoms.Count >= secondDiseasesSymptoms.Count ?
+					firstDiseasesSymptoms.Except(secondDiseasesSymptoms).First() :
+					secondDiseasesSymptoms.Except(firstDiseasesSymptoms).First();
+			}
+
 			foreach (var disease in diseases)
 			{
 				if (disease.Symptoms.Count != 0)
